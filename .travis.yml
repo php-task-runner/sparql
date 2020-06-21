@@ -1,0 +1,41 @@
+language: php
+sudo: false
+
+php:
+  - 7.1
+  - 7.2
+  - 7.3
+  - 7.4
+
+services:
+  - docker
+
+env:
+  global:
+    - SPARQL_ENDPOINT=http://dba:dba@127.0.0.1:8890
+  matrix:
+    - TEST_SUITE=PHP_CodeSniffer
+    - TEST_SUITE=PHPUnit
+
+# Only run the coding standards check once.
+matrix:
+  exclude:
+    - php: 7.1
+      env: TEST_SUITE=PHP_CodeSniffer
+    - php: 7.2
+      env: TEST_SUITE=PHP_CodeSniffer
+    - php: 7.3
+      env: TEST_SUITE=PHP_CodeSniffer
+
+before_script:
+  - composer install --no-interaction --prefer-source
+
+script:
+  # Virtuoso setup.
+  - test ${TEST_SUITE} = "PHP_CodeSniffer" || mkdir ./virtuoso
+  - test ${TEST_SUITE} = "PHP_CodeSniffer" || docker run --name virtuoso -p 8890:8890 -p 1111:1111 -e SPARQL_UPDATE=true -v virtuoso:/data -d tenforce/virtuoso
+  # Wait for Virtuoso to get up.
+  - test ${TEST_SUITE} = "PHP_CodeSniffer" || until curl -s 127.0.0.1:8890/sparql; do true; done > /dev/null 2>&1
+  # Testing.
+  - test ${TEST_SUITE} == "PHP_CodeSniffer" || ./vendor/bin/phpunit tests/
+  - test ${TEST_SUITE} == "PHPUnit" || ./vendor/bin/phpcs
