@@ -56,9 +56,7 @@ class SparqlCommands extends AbstractCommands
     public function validateQuery(CommandData $commandData): void
     {
         if (!$commandData->arguments()['queries']) {
-            throw new AbortTasksException(
-              "No queries were provided as command arguments"
-            );
+            throw new AbortTasksException("No queries were provided as command arguments");
         }
     }
 
@@ -83,9 +81,7 @@ class SparqlCommands extends AbstractCommands
         $result = $queryTask->addQuery($query)->run();
 
         if (!$result->wasSuccessful()) {
-            throw new AbortTasksException(
-              "Exit with: '{$result->getMessage()}'."
-            );
+            throw new AbortTasksException("Exit with: '{$result->getMessage()}'.");
         }
 
         $graphs = $result->getData()['results'][0];

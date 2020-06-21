@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace TaskRunner\Sparql\Tests;
 
+use EasyRdf\Sparql\Client;
 use PHPUnit\Framework\TestCase;
-use Predis\Client;
 use Symfony\Component\Yaml\Yaml;
 
 /**
@@ -30,7 +30,7 @@ class SparqlCommandsTest extends TestCase
     {
         parent::setUp();
 
-        $this->client = new \EasyRdf\Sparql\Client($this->getSparqlEndpoint() . '/sparql');
+        $this->client = new Client($this->getSparqlEndpoint() . '/sparql');
         $this->sandboxDir = realpath(__DIR__ . '/../sandbox');
 
         // SPARQL commands need the connection as configs.
@@ -49,7 +49,7 @@ class SparqlCommandsTest extends TestCase
             " 'INSERT INTO <http://example.com/graph> { <http://example.com/subject> <http://example.com/predicate> \"test\" . }'" .
             " --working-dir={$this->sandboxDir}");
 
-        $results = $this->client->query('SELECT ?g ?s ?p ?o WHERE { GRAPH ?g { ?s ?p ?o } }');
+        $results = $this->client->query('SELECT ?g ?s ?p ?o WHERE { GRAPH <http://example.com/graph> { ?s ?p ?o } }');
         $this->assertSame('http://example.com/subject', $results[0]->s->getUri());
         $this->assertSame('http://example.com/predicate', $results[0]->p->getUri());
         $this->assertSame('test', $results[0]->o->getValue());
@@ -66,15 +66,15 @@ class SparqlCommandsTest extends TestCase
     {
         $this->client->query('INSERT INTO <http://example.com/graph1> { <http://example.com/subject1> <http://example.com/predicate> "test 1" . }');
         $this->client->query('INSERT INTO <http://example.com/graph2> { <http://example.com/subject2> <http://example.com/predicate> "test 2" . }');
-        $results = $this->client->query('SELECT ?g ?s ?p ?o WHERE { GRAPH ?g { ?s ?p ?o } }');
-        $this->assertSame('http://example.com/graph1', $results[0]->g->getUri());
+        $results = $this->client->query('SELECT ?g ?s ?p ?o WHERE { GRAPH <http://example.com/graph1> { ?s ?p ?o } }');
         $this->assertSame('http://example.com/subject1', $results[0]->s->getUri());
         $this->assertSame('http://example.com/predicate', $results[0]->p->getUri());
         $this->assertSame('test 1', $results[0]->o->getValue());
-        $this->assertSame('http://example.com/graph2', $results[1]->g->getUri());
-        $this->assertSame('http://example.com/subject2', $results[1]->s->getUri());
-        $this->assertSame('http://example.com/predicate', $results[1]->p->getUri());
-        $this->assertSame('test 2', $results[1]->o->getValue());
+
+        $results = $this->client->query('SELECT ?g ?s ?p ?o WHERE { GRAPH <http://example.com/graph2> { ?s ?p ?o } }');
+        $this->assertSame('http://example.com/subject2', $results[0]->s->getUri());
+        $this->assertSame('http://example.com/predicate', $results[0]->p->getUri());
+        $this->assertSame('test 2', $results[0]->o->getValue());
 
         exec(__DIR__ . "/../../vendor/bin/run sparql:empty --working-dir={$this->sandboxDir}");
 
