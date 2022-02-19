@@ -6,6 +6,7 @@ namespace TaskRunner\Sparql\Tests;
 
 use EasyRdf\Sparql\Client;
 use PHPUnit\Framework\TestCase;
+use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Yaml\Yaml;
 
 /**
@@ -16,12 +17,12 @@ class SparqlCommandsTest extends TestCase
     /**
      * @var \EasyRdf\Sparql\Client
      */
-    protected $client;
+    protected Client $client;
 
     /**
      * @var string
      */
-    protected $sandboxDir;
+    protected string $sandboxDir;
 
     /**
      * {@inheritdoc}
@@ -31,7 +32,10 @@ class SparqlCommandsTest extends TestCase
         parent::setUp();
 
         $this->client = new Client($this->getSparqlEndpoint() . '/sparql');
-        $this->sandboxDir = realpath(__DIR__ . '/../sandbox');
+        $this->sandboxDir = __DIR__ . '/../sandbox';
+        $fs = new Filesystem();
+        $fs->remove($this->sandboxDir);
+        $fs->mkdir($this->sandboxDir);
 
         // SPARQL commands need the connection as configs.
         $config = [
