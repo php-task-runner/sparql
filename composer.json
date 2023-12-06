@@ -5,6 +5,7 @@
     "type": "library",
     "require": {
         "php": ">=7.4",
+        "ec-europa/toolkit": "^9 || ^10",
         "php-task-runner/sparql-robo-tasks": "1.x-dev"
     },
     "require-dev": {
