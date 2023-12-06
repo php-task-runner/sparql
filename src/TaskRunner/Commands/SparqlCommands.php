@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace TaskRunner\Sparql\TaskRunner\Commands;
 
 use Consolidation\AnnotatedCommand\CommandData;
-use EcEuropa\Toolkit\TaskRunner\AbstractCommands
+use EcEuropa\Toolkit\TaskRunner\AbstractCommands;
 use Robo\Collection\CollectionBuilder;
 use Robo\Exception\AbortTasksException;
 use Robo\Sparql\Tasks\Sparql\loadTasks;
